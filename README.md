@@ -1,5 +1,7 @@
 # Spherical Emergence: Energy + Information
 
+See it here: https://information-dynamics.netlify.app/
+
 This project is an interactive simulation of a local, open, non-equilibrium system on a sphere (or related topology). It shows how persistent structure can emerge without agents, goals, or optimization. Everything is driven by local rules and thermodynamic costs.
 
 ![Simulation snapshot](img_eis.png)
@@ -67,10 +69,14 @@ Noise:
 
 Structure persists only in a bounded region of parameter space.
 
-## Notes on topology experiments
+## TODO
 
-On near-isotropic meshes (Fibonacci), a tiny low-energy spot at high instability often diffuses evenly into its neighbors. The mean absolute gradient stays below `info_threshold`, so information does not accumulate and sigma does not lock in. On planar/torus grids, built-in anisotropy creates longer-lived directional gradients, so the same perturbation more readily seeds structure.
+- Run automated parameter sweeps to map regimes and show phase diagrams.
+- Define measurable outputs.
 
+## Notes
+
+This is an experimental hypothesis; outputs may include numerical artifacts.
 
 ## How to run
 

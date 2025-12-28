@@ -1,7 +1,7 @@
 import { clamp, clamp01, mulberry32 } from "./utils.js";
 import { Mesh } from "./mesh.js";
 import { Sim } from "./sim.js";
-import { Render } from "./render.js";
+import { Render, renderScalarField } from "./render.js";
 
 const app = {
   subdivisions: 4,
@@ -41,25 +41,25 @@ const app = {
 
 const presets = {
   "Test A": {
-    diffusion: 0.15,
-    sigma_slow: 0.58,
-    evaporation: 0.013,
-    info_gain: 0.43,
-    info_threshold: 0.06,
-    info_decay: 0.019,
-    info_cost: 0.015,
-    info_energy_cost: 0.9,
+    diffusion: 0.14,
+    sigma_slow: 0.37,
+    evaporation: 0.012,
+    info_gain: 0.59,
+    info_threshold: 0.045,
+    info_decay: 0.006,
+    info_cost: 0.002,
+    info_energy_cost: 0.55,
     sigma_on: 0.25,
-    sigma_off: 0.13,
-    collapse_I: 1.19,
-    collapse_fraction: 0.79,
-    jitter: 0.65,
-    sun_strength: 0.05,
-    sun_width: 0.17,
-    sun_speed: 0.009,
+    sigma_off: 0.16,
+    collapse_I: 1.44,
+    collapse_fraction: 1,
+    jitter: 0.8,
+    sun_strength: 0.16,
+    sun_width: 0.53,
+    sun_speed: 0.014,
     sun_lat_bias: 0.45,
-    sun_lon_wobble: 0.02,
-    noise_floor: 0.002,
+    sun_lon_wobble: 0.47,
+    noise_floor: 0,
   },
   "Test B": {
     diffusion: 0.17,
@@ -83,25 +83,25 @@ const presets = {
     noise_floor: 0.0012,
   },
   "Test C": {
-    diffusion: 0.16,
-    sigma_slow: 0.33,
-    evaporation: 0.015,
-    info_gain: 0.24,
-    info_threshold: 0.055,
-    info_decay: 0.019,
-    info_cost: 0.014,
-    info_energy_cost: 0.9,
-    sigma_on: 0.24,
-    sigma_off: 0.12,
-    collapse_I: 1.5,
-    collapse_fraction: 0.96,
-    jitter: 0.79,
-    sun_strength: 0.065,
+    diffusion: 0.18,
+    sigma_slow: 0.62,
+    evaporation: 0.013,
+    info_gain: 0.94,
+    info_threshold: 0.065,
+    info_decay: 0.009,
+    info_cost: 0.008,
+    info_energy_cost: 0.7,
+    sigma_on: 0.38,
+    sigma_off: 0.28,
+    collapse_I: 1.33,
+    collapse_fraction: 0.4,
+    jitter: 0.7,
+    sun_strength: 0.06,
     sun_width: 0.2,
     sun_speed: 0.01,
     sun_lat_bias: 0.45,
     sun_lon_wobble: 0.08,
-    noise_floor: 0.0015,
+    noise_floor: 0.0012,
   },
 };
 
@@ -192,6 +192,7 @@ canvas.addEventListener("pointerleave", () => {
 
 let sim = Sim.makeInitialState(mesh.vertices.length, app.seed, mulberry32);
 let rng = mulberry32(app.seed);
+
 
 function updateDerived() {
   if (app.topology === "torus") {
@@ -324,7 +325,7 @@ document.querySelectorAll("[data-topology]").forEach((btn) => {
   });
 });
 
-["composite", "energy", "info", "sigma"].forEach((mode) => {
+["composite", "energy", "info", "sigma", "sun"].forEach((mode) => {
   const btn = document.createElement("button");
   btn.className = "btn";
   btn.dataset.mode = mode;
@@ -626,10 +627,9 @@ rotationSlider.addEventListener("input", (e) => {
 const rotationLonSlider = document.querySelector('[data-key="rotationLon"] input');
 const rotationLonValue = document.querySelector('[data-key="rotationLon"] .value');
 rotationLonSlider.value = app.rotationLonDeg;
-rotationLonValue.textContent = Math.round(app.rotationLonDeg) + "°";
+rotationLonValue.textContent = "manual";
 rotationLonSlider.addEventListener("input", (e) => {
   app.rotationLonDeg = parseFloat(e.target.value);
-  rotationLonValue.textContent = Math.round(app.rotationLonDeg) + "°";
 });
 
 const rotationLatSlider = document.querySelector('[data-key="rotationLat"] input');
@@ -652,8 +652,6 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") app.rotationLatDeg = clamp(app.rotationLatDeg + 3, -80, 80);
   if (e.key === "ArrowDown") app.rotationLatDeg = clamp(app.rotationLatDeg - 3, -80, 80);
   if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-    rotationLonSlider.value = app.rotationLonDeg;
-    rotationLonValue.textContent = Math.round(app.rotationLonDeg) + "°";
     rotationLatSlider.value = app.rotationLatDeg;
     rotationLatValue.textContent = Math.round(app.rotationLatDeg) + "°";
   }
@@ -749,10 +747,12 @@ function tick(now) {
   if (app.rotationLonDeg < -180) app.rotationLonDeg += 360;
   rotation = (app.rotationLonDeg * Math.PI) / 180;
   rotationLat = (app.rotationLatDeg * Math.PI) / 180;
-  Render.renderToCanvas(ctx, sim, mesh, app.mode, app.drawGrid, canvas.width, canvas.height, rotation, rotationLat);
+  if (app.mode === "sun") {
+    renderScalarField(ctx, sim.injected, mesh, app.drawGrid, canvas.width, canvas.height, rotation, rotationLat);
+  } else {
+    Render.renderToCanvas(ctx, sim, mesh, app.mode, app.drawGrid, canvas.width, canvas.height, rotation, rotationLat);
+  }
 
-  rotationLonSlider.value = app.rotationLonDeg;
-  rotationLonValue.textContent = Math.round(app.rotationLonDeg) + "°";
   rotationLatSlider.value = app.rotationLatDeg;
   rotationLatValue.textContent = Math.round(app.rotationLatDeg) + "°";
 

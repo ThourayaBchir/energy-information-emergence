@@ -154,6 +154,19 @@ canvas {
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(76, 201, 168, 0.12);
 }
 
+.usage-hint {
+  margin-top: 20px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.usage-hint strong {
+  color: var(--text);
+}
+
 .group-title {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -227,16 +240,68 @@ input[type="range"] {
 
 .footer {
   margin-top: 16px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(12, 16, 24, 0.72);
-  font-size: 0.85rem;
-  color: var(--muted);
+  border: 1px solid rgba(130, 226, 200, 0.2);
+  background: linear-gradient(180deg, rgba(12, 18, 28, 0.92), rgba(10, 14, 22, 0.75));
+  font-size: 0.8rem;
+  color: var(--text);
+  text-align: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .footer strong {
   color: var(--text);
+}
+
+.footer a {
+  color: var(--accent-2);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(130, 226, 200, 0.4);
+  padding-bottom: 2px;
+}
+
+.footer a:hover {
+  color: var(--accent);
+  border-bottom-color: rgba(76, 201, 168, 0.8);
+}
+
+.interpretation {
+  margin-top: 16px;
+  padding: 14px 18px 14px 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(130, 226, 200, 0.28);
+  background: linear-gradient(135deg, rgba(18, 24, 34, 0.92), rgba(12, 18, 28, 0.72));
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 0 18px rgba(76, 201, 168, 0.08);
+  position: relative;
+}
+
+.interpretation strong {
+  color: var(--text);
+}
+
+.interpretation::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-3));
+  opacity: 0.9;
+}
+
+.interpretation-note {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.18);
+  font-size: 0.82rem;
+  color: var(--muted);
 }
 
 .mode-buttons,

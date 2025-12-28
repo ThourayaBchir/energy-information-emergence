@@ -9,16 +9,17 @@ export function makeInitialState(count, seed, rngFactory) {
   const dI = new Float32Array(count);
   const fluxSum = new Float32Array(count);
   const slow = new Float32Array(count);
+  const injected = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     E[i] = 0.02 * (rng() - 0.5) + 0.02 * (rng() - 0.5);
     I[i] = 0;
     S[i] = 0;
   }
-  return { E, I, S, dE, dI, fluxSum, slow, t: 0 };
+  return { E, I, S, dE, dI, fluxSum, slow, injected, t: 0 };
 }
 
 export function stepSim(state, params, neighbors, rng, lats, lons) {
-  const { E, I, S, dE, dI, fluxSum, slow } = state;
+  const { E, I, S, dE, dI, fluxSum, slow, injected } = state;
   const n = E.length;
 
   const {
@@ -60,6 +61,7 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
     const lonFactor = 0.65 + 0.35 * Math.sin(2 * Math.PI * ((lon + Math.PI) / (2 * Math.PI) + wobble));
     const inject = sun_strength * sunLatFactor * lonFactor;
 
+    injected[i] = inject;
     dE[i] += inject - evaporation * E[i];
     slow[i] = 1.0 - clamp01(S[i]) * (1.0 - sigma_slow);
   }

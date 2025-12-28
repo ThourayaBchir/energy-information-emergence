@@ -16,7 +16,6 @@
           </p>
           <div class="pill-row" id="pillRow">
             <span class="pill">lat/lon grid</span>
-            <span class="pill">fast topology</span>
             <span class="pill">non-equilibrium</span>
             <span class="pill">collapse = novelty</span>
             <span class="pill" id="gridPill">verts: 642</span>
@@ -40,6 +39,9 @@
             </button>
           </div>
           <canvas id="simCanvas"></canvas>
+          <div class="usage-hint">
+            <strong>Try:</strong> Test C with Donut or Fibonacci · Test A with Lat/Lon Grid · Test B with Hex Sphere
+          </div>
         </section>
 
         <section class="panel controls">
@@ -129,9 +131,18 @@
         </section>
       </div>
 
-      <div class="footer">
-        <strong>Interpretation (no agents, no goals).</strong> Energy smooths gradients; sigma is graded resistance
+      <div class="interpretation">
+        <strong>Interpretation.</strong> Energy smooths gradients; sigma is graded resistance
         on a uniform sphere mesh. Information condenses from strong flux. Collapse injects localized randomness.
+        <div class="interpretation-note">
+          This is an experimental hypothesis; outputs may include numerical artifacts.
+        </div>
+      </div>
+      <div class="footer">
+        <div>
+          © <a href="https://astradeep.com">astradeep.com</a> ·
+          <a href="https://github.com/ThourayaBchir/energy-information-emergence">GitHub</a>
+        </div>
       </div>
     </div>
 
