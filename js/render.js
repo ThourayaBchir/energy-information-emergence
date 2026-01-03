@@ -52,10 +52,11 @@ export function renderToCanvas(ctx, sim, mesh, mode, drawGrid, width, height, ro
           g = rgb.g;
           b = rgb.b;
         } else if (mode === "sigma") {
-          const v = Math.round(20 + 200 * s);
-          r = v;
-          g = v;
-          b = v;
+          const vN = Math.pow(s, 0.6);
+          const rgb = hslToRgb(220 - 220 * vN, 0.85, 0.22 + 0.45 * vN);
+          r = rgb.r;
+          g = rgb.g;
+          b = rgb.b;
         } else {
           const rgb = hslToRgb(220 - 220 * eN, 0.85, 0.12 + 0.65 * iN);
           r = Math.min(255, rgb.r + Math.round(28 * s));
@@ -137,8 +138,9 @@ export function renderToCanvas(ctx, sim, mesh, mode, drawGrid, width, height, ro
       return [rgb.r, rgb.g, rgb.b];
     }
     if (mode === "sigma") {
-      const v = Math.round(20 + 200 * s);
-      return [v, v, v];
+      const vN = Math.pow(s, 0.6);
+      const rgb = hslToRgb(220 - 220 * vN, 0.85, 0.22 + 0.45 * vN);
+      return [rgb.r, rgb.g, rgb.b];
     }
     const rgb = hslToRgb(220 - 220 * eN, 0.85, 0.12 + 0.65 * iN);
     return [

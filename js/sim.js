@@ -63,7 +63,8 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
 
     injected[i] = inject;
     dE[i] += inject - evaporation * E[i];
-    slow[i] = 1.0 - clamp01(S[i]) * (1.0 - sigma_slow);
+    slow[i] = sigma_slow + 2 * (1.0 - sigma_slow) * clamp01(S[i]); 
+    //console.log(slow[i]);
   }
 
   for (let i = 0; i < n; i++) {

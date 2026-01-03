@@ -181,7 +181,14 @@ Symmetric diffusion (local energy balance):
 flow = diffusion * 0.5 * (slow_i + slow_j) * (E[j] - E[i])
 E[i] += flow
 E[j] -= flow
-slow_i = 1 - sigma_i * (1 - sigma_slow)
+slow_i = sigma_slow + 2 * (1 - sigma_slow) * sigma_i
+```
+
+State update (after accumulating dE, dI):
+
+```text
+E[i] += dE[i] * dt
+I[i] = max(0, I[i] + dI[i] * dt)
 ```
 
 Flux -> information (with energy cost):
@@ -204,10 +211,9 @@ dE -= info_cost * I * (1 - 0.6 * fluxSupport)
 Sigma hysteresis:
 
 ```text
-target = 1 if I >= sigma_on
-         0 if I <= sigma_off
-         sigma otherwise
-sigma += relaxRate * (target - sigma)
+if I >= sigma_on:  sigma += relaxRate
+if I <= sigma_off: sigma -= relaxRate
+sigma = clamp01(sigma)
 ```
 
 Collapse (novelty):
@@ -217,6 +223,7 @@ release = collapse_fraction * I * info_energy_cost
 E[j] += release * weight_j / Σ weight
 E[i] -= release
 I[i] *= 0.25
+if I[i] < sigma_off: sigma[i] *= 0.5
 ```
 
 Collapse jitter:
@@ -225,16 +232,28 @@ Collapse jitter:
 weight_j *= 1 + jitter * (rng() - 0.5)
 ```
 
+Collapse weights (base term):
+
+```text
+weight_j = (0.6 + 0.8 * sigma_j) * jitter
+```
+
 Noise (flux-gated):
 
 ```text
 gate = clamp01((flux - info_threshold) / (info_threshold + ε))
-dE += noise_floor * (rng() - 0.5) * gate^2
+dE += noise_floor * (rng() - 0.5) * gate^4
 ```
+
+Implementation notes:
+
+- Collapse triggers only when I >= collapse_I.
+- Flux is accumulated once per undirected edge (j <= i is skipped), then averaged per node.
+- Integration is explicit Euler with per-step accumulators (dE, dI).
 
 Knobs (controls):
 
-- Energy flow: diffusion, sigma_slow, evaporation
+- Energy flow: diffusion, sigma_slow (mobility floor), evaporation
 - Information: info_gain, info_threshold, info_decay, info_cost, info_energy_cost
 - Sigma hysteresis: sigma_on, sigma_off
 - Collapse: collapse_I, collapse_fraction, jitter
