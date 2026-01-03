@@ -74,8 +74,7 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
       const j = nb[kN];
       if (j <= i) continue;
       const d = E[j] - Ei;
-      const kij = diffusion * 0.5 * (slow[i] + slow[j]);
-      const flow = kij * d;
+      const flow = diffusion * slow[i] * slow[j] * d;
       dE[i] += flow;
       dE[j] -= flow;
       const ad = Math.abs(d);
@@ -110,10 +109,16 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
     I[i] = Math.max(0, I[i] + dI[i] * dt);
   }
 
-  const relaxRate = 0.02;
+  // Sigma evolves on a slower timescale than E/I.
+  const relaxRate = 0.001;
   for (let i = 0; i < n; i++) {
-    if (I[i] >= sigma_on) S[i] = Math.min(1, S[i] + relaxRate);
-    else if (I[i] <= sigma_off) S[i] = Math.max(0, S[i] - relaxRate);
+    if (I[i] >= sigma_on) {
+      const delta = I[i] - sigma_on;
+      S[i] = clamp01(S[i] + relaxRate * delta * dt);
+    } else if (I[i] <= sigma_off) {
+      const delta = I[i] - sigma_off;
+      S[i] = clamp01(S[i] + relaxRate * delta * dt);
+    }
   }
 
   for (let i = 0; i < n; i++) {
@@ -128,7 +133,7 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
       for (let kN = 0; kN < deg; kN++) {
         const j = nb[kN];
         const base = 0.6 + 0.8 * clamp01(S[j]);
-        const jit = 1 + jitter * (rng() - 0.5);
+        const jit = Math.exp(jitter * (rng() - 0.5));
         const w = Math.max(0.001, base * jit);
         weights[kN] = w;
         sumW += w;

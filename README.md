@@ -8,7 +8,7 @@ This project is an interactive simulation of a local, open, non-equilibrium syst
 
 ## Core idea
 
-Structure is a temporary resistance to energy flow that is born from unstable gradients, paid for by dissipation, and recycled through collapse into the randomness that seeds its successor.
+Structure is a temporary conductivity that channels energy flow, born from unstable gradients, paid for by dissipation, and recycled through collapse into the randomness that seeds its successor.
 
 ## What the simulation models
 
@@ -16,7 +16,7 @@ Each node stores three fields:
 
 - **E (energy):** injected by a moving "sun" band, diffuses, and evaporates.
 - **I (information):** condenses only when local flux exceeds a threshold; decays and costs energy.
-- **S (sigma):** graded resistance in [0, 1] that slows diffusion; updated with hysteresis.
+- **S (sigma):** graded conductivity in [0, 1] that enhances diffusion; updated with hysteresis.
 
 The system is fully local: updates depend only on neighboring nodes.
 
@@ -26,12 +26,12 @@ The system is fully local: updates depend only on neighboring nodes.
 2. Energy diffuses to smooth gradients.
 3. Strong gradients create information.
 4. Information turns on structure (sigma).
-5. Structure resists diffusion, reshaping flow.
+5. Structure channels diffusion, reshaping flow.
 6. Information is costly and decays.
 7. If information grows too large, collapse releases energy with small randomness.
 8. The released energy seeds new gradients and new structure.
 
-The loop is: drive -> gradients -> information -> structure -> inhibited flow -> collapse -> energy + noise -> new gradients.
+The loop is: drive -> gradients -> information -> structure -> channeled flow -> collapse -> energy + noise -> new gradients.
 
 ## Topologies
 
@@ -114,7 +114,7 @@ Sun drive (moving band)
   ▼
 ENERGY (E)
   • injected + evaporates
-  • diffuses (slowed by sigma)
+  • diffuses (channeled by sigma)
   │
   ▼
 Gradients / flux ──> FLUX > θ ?
@@ -136,7 +136,7 @@ Gradients / flux ──> FLUX > θ ?
                         ▼
                      SIGMA (σ)
                         │
-                        └─ slows diffusion (feeds back to gradients)
+                        └─ channels diffusion (feeds back to gradients)
 
 If I ≥ collapse_I or E very low:
   COLLAPSE → release energy + jitter → neighbors → new gradients
@@ -156,7 +156,7 @@ Summary of causal flow:
 Drive → E gradients
 Gradients → flux → I created (costs E)
 I → σ via hysteresis (I ≥ on → σ↑, I ≤ off → σ↓)
-σ → slows diffusion → preserves gradients → sustains flux
+σ → channels diffusion → preserves gradients → sustains flux
 I maintenance + decay drains E over time
 Collapse (I or E critical) → release σ as E + jitter → reset → new gradients
 
@@ -178,10 +178,10 @@ dE += inject - evaporation * E
 Symmetric diffusion (local energy balance):
 
 ```text
-flow = diffusion * 0.5 * (slow_i + slow_j) * (E[j] - E[i])
+flow = diffusion * slow_i * slow_j * (E[j] - E[i])
 E[i] += flow
 E[j] -= flow
-slow_i = sigma_slow + 2 * (1 - sigma_slow) * sigma_i
+slow_i = sigma_slow + 2 * (1 - sigma_slow) * clamp01(sigma_i)
 ```
 
 State update (after accumulating dE, dI):
@@ -211,8 +211,8 @@ dE -= info_cost * I * (1 - 0.6 * fluxSupport)
 Sigma hysteresis:
 
 ```text
-if I >= sigma_on:  sigma += relaxRate
-if I <= sigma_off: sigma -= relaxRate
+if I >= sigma_on:  sigma += relaxRate * (I - sigma_on) * dt
+if I <= sigma_off: sigma += relaxRate * (I - sigma_off) * dt
 sigma = clamp01(sigma)
 ```
 
@@ -229,13 +229,15 @@ if I[i] < sigma_off: sigma[i] *= 0.5
 Collapse jitter:
 
 ```text
-weight_j *= 1 + jitter * (rng() - 0.5)
+weight_j *= exp(jitter * (rng() - 0.5))
 ```
 
 Collapse weights (base term):
 
 ```text
-weight_j = (0.6 + 0.8 * sigma_j) * jitter
+base_j = 0.6 + 0.8 * sigma_j
+jitter_j = exp(jitter * (rng() - 0.5))
+weight_j = max(0.001, base_j * jitter_j)
 ```
 
 Noise (flux-gated):
