@@ -62,7 +62,7 @@ export function stepSim(state, params, neighbors, rng, lats, lons) {
     const inject = sun_strength * sunLatFactor * lonFactor;
 
     injected[i] = inject;
-    dE[i] += inject - evaporation * E[i];
+    dE[i] += inject - evaporation * Math.max(0, E[i]);
     slow[i] = sigma_slow + 2 * (1.0 - sigma_slow) * clamp01(S[i]); 
     //console.log(slow[i]);
   }

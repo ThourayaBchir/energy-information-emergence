@@ -1,151 +1,619 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Energy–Information-Structure Emergence</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <div>
-          <h1>Energy–Information-Structure Emergence</h1>
-          <p class="lead">
-            Local energy–information dynamics on a configurable mesh.
-          </p>
-          <div class="pill-row" id="pillRow">
-            <span class="pill">lat/lon grid</span>
-            <span class="pill">non-equilibrium</span>
-            <span class="pill">collapse = novelty</span>
-            <span class="pill" id="gridPill">verts: 642</span>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button class="btn primary" id="runBtn">Pause</button>
-          <button class="btn" id="stepBtn">Step</button>
-          <button class="btn" id="resetBtn">Reset</button>
-          <button class="btn" id="seedBtn">New seed</button>
-        </div>
-      </header>
-
-      <div class="grid">
-        <section class="panel">
-          <div class="toolbar">
-            <div class="mode-buttons" id="modeButtons"></div>
-            <button class="toggle" id="gridToggle">
-              <span>Grid overlay</span>
-              <span id="gridState">OFF</span>
-            </button>
-          </div>
-          <canvas id="simCanvas"></canvas>
-          <div class="usage-hint">
-            <strong>Try:</strong> Test C with Donut or Fibonacci · Test A with Lat/Lon Grid · Test B with Hex Sphere
-          </div>
-        </section>
-
-        <section class="panel controls">
-          <h2 class="panel-title">Controls</h2>
-          <div class="slider" data-key="speed">
-            <label>
-              <span>Speed</span>
-              <span class="value"></span>
-            </label>
-            <input type="range" min="0.1" max="4" step="0.1" />
-          </div>
-          <div class="slider" data-key="rotation">
-            <label>
-              <span>Rotation speed</span>
-              <span class="value"></span>
-            </label>
-            <input type="range" min="0" max="0.03" step="0.001" />
-          </div>
-          <div class="slider" data-key="rotationLon">
-            <label>
-              <span>Rotate longitude</span>
-              <span class="value"></span>
-            </label>
-            <input type="range" min="-180" max="180" step="1" />
-          </div>
-          <div class="slider" data-key="rotationLat">
-            <label>
-              <span>Rotate latitude</span>
-              <span class="value"></span>
-            </label>
-            <input type="range" min="-80" max="80" step="1" />
-          </div>
-          <div class="slider" data-key="topology">
-            <label>
-              <span>Mesh/Topology</span>
-              <span class="value"></span>
-            </label>
-            <div class="topology-buttons">
-              <button class="btn" data-topology="torus">Donut</button>
-              <button class="btn" data-topology="grid">Lat/Lon Grid</button>
-              <button class="btn" data-topology="hex">Hex Sphere</button>
-              <button class="btn" data-topology="fibonacci">Fibonacci</button>
-            </div>
-          </div>
-          <div class="slider" data-key="phase">
-            <label>
-              <span>Phase (order to structure to chaos)</span>
-              <span class="value"></span>
-            </label>
-            <input type="range" min="0" max="1" step="0.01" />
-          </div>
-
-          <div class="preset-buttons section-spacing" id="presetButtons"></div>
-
-          <div class="resolution-buttons section-spacing">
-            <button class="btn" id="resUp">+ Resolution</button>
-            <button class="btn" id="resDown">- Resolution</button>
-          </div>
-
-          <div class="divider"></div>
-          <div class="group-title">Energy flow</div>
-          <div id="energySliders"></div>
-
-          <div class="divider"></div>
-          <div class="group-title">Information</div>
-          <div id="infoSliders"></div>
-
-          <div class="divider"></div>
-          <div class="group-title">Sigma hysteresis</div>
-          <div id="sigmaSliders"></div>
-
-          <div class="divider"></div>
-          <div class="group-title">Collapse = novelty</div>
-          <div id="collapseSliders"></div>
-
-          <div class="divider"></div>
-          <div class="group-title">Sun drive</div>
-          <div id="sunSliders"></div>
-
-          <div class="divider"></div>
-          <div class="group-title">Noise</div>
-          <div id="noiseSliders"></div>
-
-          <div class="hint spaced">
-            Tip: the hex sphere removes polar artifacts. For near chaos, apply Near-chaos and raise phase toward 0.8–1.0.
-          </div>
-        </section>
-      </div>
-
-      <div class="interpretation">
-        <strong>Interpretation.</strong> Energy smooths gradients; sigma is graded resistance
-        on a uniform sphere mesh. Information condenses from strong flux. Collapse injects localized randomness.
-        <div class="interpretation-note">
-          This is an experimental hypothesis; outputs may include numerical artifacts.
-        </div>
-      </div>
-      <div class="footer">
-        <div>
-          © <a href="https://astradeep.com">astradeep.com</a> ·
-          <a href="https://github.com/ThourayaBchir/energy-information-emergence">GitHub</a>
-        </div>
-      </div>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Energy–Information–Structure — Minimal Regime Machine</title>
+<style>
+  :root { --bg:#0b0e14; --fg:#eaeaf0; --panel: rgba(0,0,0,0.22); }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  #wrap {
+    height:100vh;
+    display:grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: 1fr auto;
+    gap:16px;
+    padding:16px;
+    align-items:stretch;
+    align-content:start;
+  }
+  #stage {
+    border-radius:16px;
+    background:
+      radial-gradient(1200px 700px at 40% 20%, rgba(255,255,255,0.05), transparent 60%),
+      #06080c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+  }
+  canvas { display:block; background:transparent; width:100%; height:100%; }
+  #ui {
+    width:100%;
+    align-self:stretch;
+    padding:12px;
+    border-radius:12px; background:var(--panel);
+    display:grid; grid-template-columns: repeat(6, 1fr);
+    gap:10px; align-items:end;
+  }
+  #foot {
+    grid-column: 1 / -1;
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    align-items:center;
+    padding:3px 0;
+    margin:0 auto;
+    width:100%;
+    text-align:center;
+    font-size:10px;
+    line-height:1;
+    opacity:0.5;
+  }
+  #foot a { color: var(--fg); text-decoration: none; }
+  #foot a:hover { text-decoration: underline; }
+  #help { grid-column:1/-1; font-size:11px; opacity:0.88; line-height:1.4; }
+  .row { grid-column:1/-1; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .advanced-actions { margin: 6px 0 10px; }
+  .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+    color: var(--fg); padding:6px 10px; border-radius:10px; cursor:pointer; font-size:12px; }
+  .btn:active { transform: translateY(1px); }
+  .pill { padding:4px 8px; border-radius:999px; background: rgba(255,255,255,0.08); font-size:11px; opacity:0.9; }
+  .key-btn { white-space: nowrap; }
+  .slider { display:grid; gap:6px; }
+  .slider label { font-size:11px; opacity:0.9; display:flex; justify-content:space-between; gap:4px; }
+  .slider .v { opacity:0.8; }
+  .slider input { width:100%; }
+  details { grid-column:1/-1; }
+  summary { cursor:pointer; font-size:12px; opacity:0.9; }
+  @media (max-width: 980px) {
+    #wrap {
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(320px, 1fr) auto;
+      padding:12px;
+    }
+    #ui { margin:0; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <canvas id="c"></canvas>
+  </div>
+  <div id="ui">
+    <div id="help">
+      <b>Minimal regime machine:</b> Energy E diffuses under σ-conductance → measured flux condenses Information I (costly) → I writes σ (structure) with hysteresis → σ focuses flow → high I collapses (jittered release) which seeds new gradients.
+      <br/>Keys: <b>1</b>=E, <b>2</b>=I, <b>3</b>=σ, <b>4</b>=composite. Space=pause. R=reset. <b>P</b>=toggle phase-lock.
     </div>
 
-    <script type="module" src="js/app.js"></script>
-  </body>
+    <div class="row">
+      <button class="btn" id="pauseBtn">Pause</button>
+      <button class="btn" id="resetBtn">Reset</button>
+      <button class="btn" id="modeEBtn" type="button">E</button>
+      <button class="btn" id="modeIBtn" type="button">I</button>
+      <button class="btn" id="modeSBtn" type="button">σ</button>
+      <button class="btn" id="modeCBtn" type="button">Composite</button>
+      <span class="pill" id="statsPill">…</span>
+    </div>
+
+    <div class="slider" style="grid-column:1/-1;">
+      <label><span>Phase (one slider moves across regimes)</span><span class="v" id="phaseVal">0.70</span></label>
+      <input id="phase" type="range" min="0" max="1" step="0.01" value="0.70" />
+    </div>
+
+    <details>
+      <summary>Advanced knobs (optional)</summary>
+      <div class="row advanced-actions">
+        <button class="btn" id="testABtn" type="button">Test A</button>
+        <button class="btn" id="testBBtn" type="button">Test B</button>
+        <button class="btn" id="testCBtn" type="button">Test C</button>
+        <button class="btn" id="testDBtn" type="button">Test D</button>
+        <button class="btn" id="testEBtn" type="button">Test E</button>
+        <button class="btn" id="testFBtn" type="button">Test F</button>
+        <button class="btn" id="testGBtn" type="button">Test G</button>
+        <button class="btn" id="testHBtn" type="button">Test H</button>
+        <button class="btn" id="testIBtn" type="button">Test I</button>
+        <button class="btn" id="testJBtn" type="button">Test J</button>
+        <button class="btn" id="testKBtn" type="button">Test K</button>
+        <button class="btn" id="testLBtn" type="button">Test L</button>
+      </div>
+      <div id="sliders"></div>
+    </details>
+  </div>
+  <footer id="foot">
+    <a href="https://astradeep.com">astradeep.com</a>
+    <span>·</span>
+    <a href="https://github.com/ThourayaBchir/energy-information-emergence">GitHub</a>
+    <span>·</span>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">License</a>
+  </footer>
+</div>
+
+<script type="module">
+import {
+  W,
+  H,
+  N,
+  WRAP,
+  DEG,
+  clamp01,
+  clamp,
+  idx,
+  createParams,
+  applyPhase as applyPhaseParams,
+  createState,
+  resetState,
+  stepSim,
+} from "./js/sim-core.js";
+import { TEST_PRESETS } from "./js/sim-presets.js";
+
+// ===== Concept =====
+// Equivalence loop:
+// - I is expensive to create (E -> I)
+// - σ is expensive to write & maintain (E -> σ)
+// - I decays (I -> E) and σ relaxes (σ -> E) so constraint isn't free
+
+const params = createParams();
+let seed = 1;
+const state = createState(seed);
+let rng = state.rng;
+const { E, I, S } = state;
+
+const historyLength = 2000;
+const sumIHistory = new Float32Array(historyLength);
+const sumSHistory = new Float32Array(historyLength);
+let historyIndex = 0;
+
+// ===== Top-2 fixes =====
+// 1) Torus wrapping: remove boundary sinks by wrapping neighbors in x/y.
+// 2) Degree-normalized flux: divide local fluxSum by true neighbor degree.
+//
+// Note: WRAP also applies to the drive distance in y so the sun band is seamless.
+const testAPreset = TEST_PRESETS.A;
+const testBPreset = TEST_PRESETS.B;
+const testCPreset = TEST_PRESETS.C;
+const testDPreset = TEST_PRESETS.D;
+const testEPreset = TEST_PRESETS.E;
+const testFPreset = TEST_PRESETS.F;
+const testGPreset = TEST_PRESETS.G;
+const testHPreset = TEST_PRESETS.H;
+const testIPreset = TEST_PRESETS.I;
+const testJPreset = TEST_PRESETS.J;
+const testKPreset = TEST_PRESETS.K;
+const testLPreset = TEST_PRESETS.L;
+
+// ===== Phase mapping =====
+let phase = 0.70;
+let phaseLock = true;
+let initPhase = true;
+
+function applyPhase(p){
+  applyPhaseParams(params, p);
+}
+
+// ===== Canvas =====
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+function resizeCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const sizeCss = Math.min(window.innerWidth, window.innerHeight - 210);
+  const size = Math.max(460, Math.floor(sizeCss));
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = Math.floor(size * dpr);
+  canvas.height = Math.floor(size * dpr);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const off = document.createElement('canvas');
+off.width = W;
+off.height = H;
+const offCtx = off.getContext('2d');
+offCtx.imageSmoothingEnabled = false;
+const img = offCtx.createImageData(W, H);
+
+// ===== Init =====
+function reset(){
+  resetState(state, seed);
+  rng = state.rng;
+}
+reset();
+
+// ===== Step =====
+let lastDrive = 0, lastDiss = 0;
+
+function step(t){
+  const res = stepSim(state, params, t);
+  lastDrive = res.driveSum;
+  lastDiss = res.dissSum;
+  recordHistory();
+}
+
+// ===== Rendering =====
+let renderMode = 'composite';
+let running = true;
+
+function setRenderMode(mode) {
+  renderMode = mode;
+  document.getElementById('modeEBtn').classList.toggle('active', mode === 'E');
+  document.getElementById('modeIBtn').classList.toggle('active', mode === 'I');
+  document.getElementById('modeSBtn').classList.toggle('active', mode === 'S');
+  document.getElementById('modeCBtn').classList.toggle('active', mode === 'composite');
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === '1') setRenderMode('E');
+  if (e.key === '2') setRenderMode('I');
+  if (e.key === '3') setRenderMode('S');
+  if (e.key === '4') setRenderMode('composite');
+  if (e.key === ' ') running = !running;
+  if (e.key.toLowerCase() === 'r') reset();
+  if (e.key.toLowerCase() === 'p') {
+    phaseLock = !phaseLock;
+    // when re-locking, re-apply phase to sync the model and sliders
+    if (phaseLock) applyPhase(phase);
+    refreshAdvanced();
+  }
+});
+
+function render(){
+  let Emin=1e9, Emax=-1e9, Imax=1e-9;
+  let sumE=0, sumI=0, sumS=0;
+  for (let i=0;i<N;i++){
+    const e = E[i];
+    if (e < Emin) Emin = e;
+    if (e > Emax) Emax = e;
+    if (I[i] > Imax) Imax = I[i];
+    sumE += e;
+    sumI += I[i];
+    sumS += clamp01(S[i]);
+  }
+  const Er = Math.max(1e-6, Emax - Emin);
+  const meanE = sumE / N;
+  const meanI = sumI / N;
+  const meanS = sumS / N;
+
+  const kC = params.contrast;
+  for (let i=0;i<N;i++){
+    const eN = clamp01((E[i] - Emin) / Er);
+    const iN = clamp01(I[i] / (Imax || 1));
+    const s  = clamp01(S[i]);
+
+    let r,g,b;
+    if (renderMode === 'E'){
+      const v = clamp01(Math.pow(eN, 0.9) * kC);
+      r = g = b = (20 + 235*v) | 0;
+    } else if (renderMode === 'I'){
+      const v = clamp01(Math.pow(iN, 0.85) * kC);
+      r = (20 + 40*v) | 0;
+      g = (20 + 235*v) | 0;
+      b = (20 + 40*v) | 0;
+    } else if (renderMode === 'S'){
+      const v = clamp01(Math.pow(s, 0.7) * kC);
+      r = (20 + 235*v) | 0;
+      g = (20 + 70*v) | 0;
+      b = (20 + 70*v) | 0;
+    } else {
+      r = (30 + 210*s) | 0;
+      g = (30 + 210*iN) | 0;
+      b = (30 + 210*eN) | 0;
+    }
+
+    const p = i*4;
+    img.data[p]   = r;
+    img.data[p+1] = g;
+    img.data[p+2] = b;
+    img.data[p+3] = 255;
+  }
+
+  offCtx.putImageData(img, 0, 0);
+
+  const cw = canvas.width, ch = canvas.height;
+  const scale = Math.min(cw / W, ch / H);
+  const drawW = W * scale;
+  const drawH = H * scale;
+  const ox = (cw - drawW) * 0.5;
+  const oy = (ch - drawH) * 0.5;
+  ctx.clearRect(0,0,cw,ch);
+  ctx.drawImage(off, ox, oy, drawW, drawH);
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.fillRect(10, 10, 520, 74);
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.font = '18px ui-monospace, monospace';
+  ctx.fillText(`mode=${renderMode}  phase=${phase.toFixed(2)}  seed=${seed}`, 20, 32);
+  ctx.fillText(`⟨E⟩=${meanE.toFixed(4)}  ⟨I⟩=${meanI.toFixed(4)}  ⟨σ⟩=${meanS.toFixed(3)}  drive=${lastDrive.toFixed(2)}  diss=${lastDiss.toFixed(2)}`, 20, 52);
+  ctx.fillText(`diff=${params.diffusion.toFixed(3)}  thr=${params.info_threshold.toFixed(3)}  σ_gain=${params.sigma_gain.toFixed(2)}  collapse_I=${params.collapse_I.toFixed(2)}`, 20, 72);
+  ctx.restore();
+
+  drawHistory();
+
+  document.getElementById('statsPill').textContent = `⟨E⟩ ${meanE.toFixed(3)} | ⟨I⟩ ${meanI.toFixed(3)} | ⟨σ⟩ ${meanS.toFixed(3)}`;
+}
+
+function recordHistory() {
+  let sumI = 0;
+  let sumS = 0;
+  for (let i = 0; i < N; i++) {
+    sumI += I[i];
+    sumS += S[i];
+  }
+  sumIHistory[historyIndex] = sumI;
+  sumSHistory[historyIndex] = sumS;
+  historyIndex = (historyIndex + 1) % historyLength;
+}
+
+function drawHistory() {
+  const chartH = 110;
+  const chartX = 20;
+  const chartW = Math.max(120, canvas.width - chartX * 2);
+  const chartY = canvas.height - chartH - 0;
+
+  ctx.fillStyle = 'rgba(6,10,16,0.72)';
+  ctx.fillRect(chartX - 10, chartY - 10, chartW + 20, chartH + 20);
+
+  let maxI = 1e-6;
+  let maxS = 1e-6;
+  for (let i = 0; i < historyLength; i++) {
+    if (sumIHistory[i] > maxI) maxI = sumIHistory[i];
+    if (sumSHistory[i] > maxS) maxS = sumSHistory[i];
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = chartY + (chartH * i / 4);
+    ctx.beginPath();
+    ctx.moveTo(chartX, y);
+    ctx.lineTo(chartX + chartW, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#66d9ef';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < historyLength; i++) {
+    const idx = (historyIndex + i) % historyLength;
+    const x = chartX + (i / historyLength) * chartW;
+    const normI = sumIHistory[idx] / maxI;
+    const y = chartY + chartH * (1 - normI);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.strokeStyle = '#ff6fb1';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < historyLength; i++) {
+    const idx = (historyIndex + i) % historyLength;
+    const x = chartX + (i / historyLength) * chartW;
+    const normS = sumSHistory[idx] / maxS;
+    const y = chartY + chartH * (1 - normS);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '18px ui-monospace, monospace';
+  const labelY = chartY - 10;
+  ctx.fillText(`ΣI max=${maxI.toFixed(1)}`, chartX + 6, labelY);
+  ctx.fillText(`Σσ max=${maxS.toFixed(1)}`, chartX + 190, labelY);
+  ctx.fillText('past \u2192 present', chartX + 360, labelY);
+}
+
+// ===== Advanced sliders (must be initialized BEFORE we call setPhase) =====
+const slidersDiv = document.getElementById('sliders');
+const sliderSpec = {
+  diffusion: { min: 0.0, max: 0.25, step: 0.001 },
+  sigma_base: { min: 0.0, max: 0.5, step: 0.001 },
+  sigma_gain: { min: 0.0, max: 3.5, step: 0.01 },
+  evaporation: { min: 0.0, max: 0.02, step: 0.0005 },
+  sun_strength: { min: 0.0, max: 0.4, step: 0.001 },
+  sun_width: { min: 0.05, max: 0.6, step: 0.005 },
+  sun_speed: { min: 0.0, max: 0.05, step: 0.0005 },
+  info_threshold: { min: 0.0, max: 0.25, step: 0.001 },
+  info_gain: { min: 0.0, max: 1.5, step: 0.01 },
+  info_power: { min: 1.0, max: 3.0, step: 0.05 },
+  info_decay: { min: 0.0, max: 0.08, step: 0.001 },
+  sigma_on: { min: 0.05, max: 1.5, step: 0.01 },
+  sigma_off: { min: 0.0, max: 1.2, step: 0.01 },
+  sigma_rate: { min: 0.0, max: 0.05, step: 0.001 },
+  sigma_write_cost: { min: 0.0, max: 2.5, step: 0.01 },
+  sigma_maint_cost: { min: 0.0, max: 0.02, step: 0.0001 },
+  sigma_relax: { min: 0.0, max: 0.04, step: 0.0005 },
+  collapse_I: { min: 0.2, max: 2.0, step: 0.01 },
+  collapse_fraction: { min: 0.05, max: 1.0, step: 0.01 },
+  jitter: { min: 0.0, max: 1.5, step: 0.01 },
+  jump_prob: { min: 0.0, max: 0.03, step: 0.0001 },
+  contrast: { min: 0.7, max: 1.7, step: 0.01 }
+};
+
+// IMPORTANT: sliderEls must exist before any call to refreshAdvanced()
+const sliderEls = Object.create(null);
+
+function addSlider(key){
+  const spec = sliderSpec[key];
+  if (!spec) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'slider';
+  const lab = document.createElement('label');
+  const name = document.createElement('span');
+  name.textContent = key;
+  const val = document.createElement('span');
+  val.className = 'v';
+  lab.appendChild(name);
+  lab.appendChild(val);
+
+  const inp = document.createElement('input');
+  inp.type = 'range';
+  inp.min = spec.min; inp.max = spec.max; inp.step = spec.step;
+
+  const fmt = (x)=> (Math.abs(x) >= 1 ? x.toFixed(2) : x.toFixed(4));
+  inp.value = params[key];
+  val.textContent = fmt(params[key]);
+
+  inp.addEventListener('input', ()=>{
+    params[key] = parseFloat(inp.value);
+    if (key === 'sigma_off') params.sigma_off = Math.min(params.sigma_off, params.sigma_on - 0.02);
+    if (key === 'sigma_on') params.sigma_on = Math.max(params.sigma_on, params.sigma_off + 0.02);
+    val.textContent = fmt(params[key]);
+  });
+
+  wrap.appendChild(lab);
+  wrap.appendChild(inp);
+  slidersDiv.appendChild(wrap);
+  sliderEls[key] = { inp, val, fmt };
+}
+
+[
+  'diffusion','sigma_base','sigma_gain','evaporation',
+  'sun_strength','sun_width','sun_speed',
+  'info_threshold','info_gain','info_power','info_decay',
+  'sigma_on','sigma_off','sigma_rate',
+  'sigma_write_cost','sigma_maint_cost','sigma_relax',
+  'collapse_I','collapse_fraction','jitter','jump_prob','contrast'
+].forEach(addSlider);
+
+function refreshAdvanced(){
+  // safe even if called early
+  if (!phaseLock) return;
+  for (const k in sliderEls){
+    const el = sliderEls[k];
+    el.inp.value = params[k];
+    el.val.textContent = el.fmt(params[k]);
+  }
+}
+
+function applyAdvancedPreset(preset) {
+  Object.keys(preset).forEach((key) => {
+    params[key] = preset[key];
+  });
+  for (const k in sliderEls) {
+    const el = sliderEls[k];
+    const val = params[k];
+    if (val === undefined) continue;
+    el.inp.value = val;
+    el.val.textContent = el.fmt(val);
+  }
+}
+
+// ===== UI =====
+const phaseSlider = document.getElementById('phase');
+const phaseVal = document.getElementById('phaseVal');
+function setPhase(p){
+  phase = p;
+  phaseVal.textContent = p.toFixed(2);
+  if (phaseLock && !initPhase) applyPhase(p);
+  refreshAdvanced();
+}
+
+phaseSlider.addEventListener('input', () => setPhase(parseFloat(phaseSlider.value)));
+setPhase(phase);
+initPhase = false;
+setRenderMode(renderMode);
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+  running = !running;
+  document.getElementById('pauseBtn').textContent = running ? 'Pause' : 'Play';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => reset());
+document.getElementById('modeEBtn').addEventListener('click', () => setRenderMode('E'));
+document.getElementById('modeIBtn').addEventListener('click', () => setRenderMode('I'));
+document.getElementById('modeSBtn').addEventListener('click', () => setRenderMode('S'));
+document.getElementById('modeCBtn').addEventListener('click', () => setRenderMode('composite'));
+document.getElementById('testABtn').addEventListener('click', () => applyAdvancedPreset(testAPreset));
+document.getElementById('testBBtn').addEventListener('click', () => applyAdvancedPreset(testBPreset));
+document.getElementById('testCBtn').addEventListener('click', () => applyAdvancedPreset(testCPreset));
+document.getElementById('testDBtn').addEventListener('click', () => applyAdvancedPreset(testDPreset));
+document.getElementById('testEBtn').addEventListener('click', () => applyAdvancedPreset(testEPreset));
+document.getElementById('testFBtn').addEventListener('click', () => applyAdvancedPreset(testFPreset));
+document.getElementById('testGBtn').addEventListener('click', () => applyAdvancedPreset(testGPreset));
+document.getElementById('testHBtn').addEventListener('click', () => applyAdvancedPreset(testHPreset));
+document.getElementById('testIBtn').addEventListener('click', () => applyAdvancedPreset(testIPreset));
+document.getElementById('testJBtn').addEventListener('click', () => applyAdvancedPreset(testJPreset));
+document.getElementById('testKBtn').addEventListener('click', () => applyAdvancedPreset(testKPreset));
+document.getElementById('testLBtn').addEventListener('click', () => applyAdvancedPreset(testLPreset));
+
+// ===== Tests =====
+(function runTests(){
+  console.assert(E.length===N && I.length===N && S.length===N, 'field sizes mismatch');
+  console.assert(img.data.length===N*4, 'ImageData size mismatch');
+  console.assert(typeof refreshAdvanced === 'function', 'refreshAdvanced missing');
+  console.assert(sliderEls && typeof sliderEls === 'object', 'sliderEls not initialized');
+
+  // refreshAdvanced should not throw
+  try { refreshAdvanced(); } catch (e) { console.error(e); console.assert(false, 'refreshAdvanced threw'); }
+
+  // Degree array should be valid
+  for (let k=0;k<100;k++){
+    const i = (rng()*N)|0;
+    console.assert(DEG[i] >= 2 && DEG[i] <= 4, 'DEG out of range');
+    if (WRAP) console.assert(DEG[i] === 4, 'WRAP implies degree=4');
+  }
+
+  // Torus wrapping diffusion sanity: seam neighbors must exchange energy
+  // We temporarily disable all non-transport effects to isolate diffusion.
+  const saved = { ...params };
+  params.sun_strength = 0;
+  params.evaporation = 0;
+  params.info_gain = 0;
+  params.info_decay = 0;
+  params.sigma_rate = 0;
+  params.sigma_write_cost = 0;
+  params.sigma_maint_cost = 0;
+  params.sigma_relax = 0;
+  params.collapse_I = 1e9;
+  params.diffusion = 0.10;
+  params.sigma_base = 1.0;
+  params.sigma_gain = 0.0;
+
+  // initialize a seam gradient: (0,0) high, (W-1,0) low; they should exchange when WRAP is true
+  E.fill(0); I.fill(0); S.fill(0);
+  const a = idx(0,0);
+  const b = idx(W-1,0);
+  E[a] = 1.0;
+  E[b] = 0.0;
+  step(0);
+  if (WRAP){
+    console.assert(E[a] < 1.0, 'seam flow did not reduce high cell');
+    console.assert(E[b] > 0.0, 'seam flow did not increase low cell');
+  }
+
+  // restore params and reset
+  Object.assign(params, saved);
+  reset();
+
+  // sanity: step should not produce NaN quickly
+  step(0);
+  for (let k=0;k<400;k++){
+    const i = (rng()*N)|0;
+    const v = E[i] + I[i] + S[i];
+    console.assert(Number.isFinite(v), 'Non-finite detected');
+  }
+  reset();
+})();
+
+// ===== Main loop =====
+let t = 0;
+function loop(){
+  if (running){
+    for (let k=0;k<3;k++) step(t++);
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
 </html>

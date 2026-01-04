@@ -1,263 +1,267 @@
-# Spherical Emergence: Energy + Information
+# Energy–Information–Structure Simulator
 
-See it here: https://information-dynamics.netlify.app/
+![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
 
-This project is an interactive simulation of a local, open, non-equilibrium system on a sphere (or related topology). It shows how persistent structure can emerge without agents, goals, or optimization. Everything is driven by local rules and thermodynamic costs.
+The goal is to find a minimum set of local rules that can generate many dynamical regimes, where structure and large‑scale patterns emerge beyond the local rules themselves — potentially yielding anything interesting.
 
-![Simulation snapshot](img_eis.png)
+The novel mechanism is to create dynamics through an energy–information–structure loop:
+- **Energy (E)** is a local potential that is injected, transported, and dissipated.
+- **Information (I)** is stored anomalous energy flux: it appears only when transported flow exceeds what smooth diffusion can absorb, and it costs energy to exist.
+- **Structure (σ)** is a paid constraint on flow: it modifies conductance, costs energy to write and maintain, and relaxes if unsupported.
+These three quantities continuously transform into one another through purely local accounting, without agents, goals, or optimization.
+
+<br/>
+
+<p align="center">
+  <img src="assets/images/img_eis_2.png" alt="Simulation snapshot" width="620">
+</p>
+
+<br/>
+
+This is a **substrate‑level dynamical model** built from local diffusion, flux‑thresholded information, hysteretic structure, and collapse on a driven grid/mesh. The current demo (`index.html`) runs on a 2D torus grid with degree‑normalized flux.
+
+
+<br/>
 
 ## Core idea
 
-Structure is a temporary conductivity that channels energy flow, born from unstable gradients, paid for by dissipation, and recycled through collapse into the randomness that seeds its successor.
+The simulation is built on a single loop:
 
-## What the simulation models
+> **Energy potential → flux → information → structure → modified flux**
 
-Each node stores three fields:
-
-- **E (energy):** injected by a moving "sun" band, diffuses, and evaporates.
-- **I (information):** condenses only when local flux exceeds a threshold; decays and costs energy.
-- **S (sigma):** graded conductivity in [0, 1] that enhances diffusion; updated with hysteresis.
-
-The system is fully local: updates depend only on neighboring nodes.
-
-## Dynamics
-
-1. A moving band injects energy (open system).
-2. Energy diffuses to smooth gradients.
-3. Strong gradients create information.
-4. Information turns on structure (sigma).
-5. Structure channels diffusion, reshaping flow.
-6. Information is costly and decays.
-7. If information grows too large, collapse releases energy with small randomness.
-8. The released energy seeds new gradients and new structure.
-
-The loop is: drive -> gradients -> information -> structure -> channeled flow -> collapse -> energy + noise -> new gradients.
-
-## Topologies
-
-- **Hex sphere:** dual of icosphere faces (more uniform neighborhoods).
-- **Fibonacci sphere:** near-uniform point set with approximate neighbors.
-- **Lat/Lon grid:** equirectangular grid (fast but has polar artifacts).
-- **Torus:** periodic in both directions.
-
-## Parameters (knobs)
-
-Energy flow:
-- `diffusion`, `sigma_slow`, `evaporation`
-
-Information:
-- `info_gain`, `info_threshold`, `info_decay`, `info_cost`, `info_energy_cost`
-
-Sigma hysteresis:
-- `sigma_on`, `sigma_off`
-
-Collapse:
-- `collapse_I`, `collapse_fraction`, `jitter`
-
-Sun drive:
-- `sun_strength`, `sun_width`, `sun_speed`, `sun_lat_bias`, `sun_lon_wobble`
-
-Noise:
-- `noise_floor` (optional, flux-gated)
-
-## Expected regimes
-
-- **Smooth equilibration:** little or no structure.
-- **Persistent channels/bands:** stable sigma patterns that guide flow.
-- **Punctuated change:** collapse events reshape structure.
-- **Shutdown:** excessive constraint or weak drive stalls dynamics.
-
-Structure persists only in a bounded region of parameter space.
-
-## TODO
-
-- Run automated parameter sweeps to map regimes and show phase diagrams.
-- Define measurable outputs.
-
-## Notes
-
-This is an experimental hypothesis; outputs may include numerical artifacts.
-
-## How to run
-
-This project uses ES modules, so you need to serve it over `http://` (opening the HTML file via `file://` will be blocked by CORS).
-
-From the project root, run:
-
-```sh
-python3 -m http.server 8000
-```
-
-Then open in your browser:
-
-```
-http://localhost:8000/index.html
-```
-
-If you prefer a different port, adjust the `8000` above.
-
-Open the HTML file in a browser:
-
-- `index.html`
-
-No build step or dependencies required.
-
-## Diagram
-
-
+Structure is not injected. Information is not symbolic. Everything emerges from **local energy flow under cost and dissipation**.
 
 ```text
-SYSTEM LOOP
-
-Sun drive (moving band)
-  │
-  ▼
-ENERGY (E)
-  • injected + evaporates
-  • diffuses (channeled by sigma)
-  │
-  ▼
-Gradients / flux ──> FLUX > θ ?
-                        │
-                        ▼
-                 INFORMATION (I)
-                  • created from flux
-                  • costs energy
-                  • decays
-                        │
-        ┌───────────────┼───────────────┐
-        │                               │
-     I ≥ σ_on                        I ≤ σ_off
-        │                               │
-        ▼                               ▼
-    sigma rises                     sigma falls
-        │                               │
-        └───────────────┬───────────────┘
-                        ▼
-                     SIGMA (σ)
-                        │
-                        └─ channels diffusion (feeds back to gradients)
-
-If I ≥ collapse_I or E very low:
-  COLLAPSE → release energy + jitter → neighbors → new gradients
-
-KEY FEEDBACK LOOPS
-Positive: flux → I → σ → holds gradients → flux
-Negative: I maintenance drains E → E drops → collapse
-Reset:    collapse → energy + noise → new patterns
-
-TOPOLOGY-AGNOSTIC
-Works on: hex sphere, Fibonacci, grid, torus
-Only neighbor graph changes; rules stay the same
+        energy (E)
+            |
+            v
+   gradient-driven flux
+            |
+            v
+     information (I)
+            |
+            v
+      structure (σ)
+            |
+            v
+   modified conductance
+            |
+            +----> back to flux
 ```
 
-Summary of causal flow:
+The key idea is:
 
-Drive → E gradients
-Gradients → flux → I created (costs E)
-I → σ via hysteresis (I ≥ on → σ↑, I ≤ off → σ↓)
-σ → channels diffusion → preserves gradients → sustains flux
-I maintenance + decay drains E over time
-Collapse (I or E critical) → release σ as E + jitter → reset → new gradients
-
-This creates self-organizing criticality: structure emerges, persists under drive, then collapses and reorganizes with novelty.
+> **Information and structure are not separate from energy — they are different, costly organizations of energetic flow.**
 
 
+<br/>
 
-## Main Equations and Knobs
+## State variables (per cell)
 
-Main equations (with meaning):
+Each cell stores three continuous quantities:
 
-Sun drive + evaporation:
+- **E — Energy potential**  
+  A local free‑energy–like budget. Gradients of E drive flow. E may be negative, representing *energy debt*.
 
+- **I — Information**  
+  A persistent, energetically paid memory of *unusually strong energy flux*. I is created by flux, decays over time, and can collapse.
+
+- **σ — Structure**  
+  Stored constraint (conductance) that reshapes future energy flow. Structure is costly to write and maintain.
+
+
+
+<br/>
+
+## Local rules (informal)
+
+1. **Open system**  
+   Energy is injected externally (a moving drive) and dissipated locally.
+
+2. **Energy diffusion**  
+   Energy flows down gradients. The amount of flow depends on local structure (σ).
+
+3. **Flux → Information**  
+   When local energy flux exceeds a baseline, information is created, this creation costs energy and is limited by available E (predicted E after the current step).
+
+4. **Information decay**  
+   Information decays unless reinforced, refunding its energetic cost.
+
+5. **Information → Structure**  
+   Sustained information slowly writes structure (σ) via hysteresis. Structure is expensive to create and maintain.
+
+6. **Collapse**  
+   Excessive information triggers collapse: a release budget is taken from available E, structure weakens, and energy is redistributed locally with jittered (random) weights. A rare non‑local jump can move part of that same release to a random cell.
+
+All rules are **local**, **continuous**, and **energetically accounted**.
+
+
+<br/>
+
+## Model equations (index.html)
+
+Per cell i with neighbors j in N(i). Discrete-time form. These match the current demo; other variants may differ.
+
+**Energy drive + evaporation (accumulate dE)**
 ```text
-inject = sun_strength * exp(-0.5 * ((lat - bandCenterLat) / sun_width)^2) * (0.65 + 0.35 * sin(2π * (lon_norm + wobble)))
-dE += inject - evaporation * E
+dE_i += D_i(t) - eps * max(E_i, 0)
 ```
+<br>
 
-Symmetric diffusion (local energy balance):
 
+**Structure-dependent diffusion (accumulate dE)**
 ```text
-flow = diffusion * slow_i * slow_j * (E[j] - E[i])
-E[i] += flow
-E[j] -= flow
-slow_i = sigma_slow + 2 * (1 - sigma_slow) * clamp01(sigma_i)
+g_ij = sigma0 + sigmag * clip(sigma_i, 0, 1) * clip(sigma_j, 0, 1)
+
+F_ij = kappa * g_ij * (E_j - E_i)
+
+dE_i += sum_{j in N(i)} F_ij
+
 ```
+<br>
 
-State update (after accumulating dE, dI):
-
+**Flux magnitude (local “surprise”)**
 ```text
-E[i] += dE[i] * dt
-I[i] = max(0, I[i] + dI[i] * dt)
+Phi_i = (1/|N(i)|) * sum_{j in N(i)} |E_j - E_i|
+
 ```
+<br>
 
-Flux -> information (with energy cost):
-
+**Flux -> Information (I), costly condensation (accumulate dE, dI)**
 ```text
-flux_i = (1 / deg_i) * Σ_j |E[j] - E[i]|
-gain = info_gain * max(0, flux_i - info_threshold)
-I += gain
-E -= info_energy_cost * gain
+G_i = alphaI * max(0, Phi_i - thetaI) ^ pI
+
+available = max(E_i + dE_i*dt, 0)
+affordable fraction a_i = min(1, available / (cI*G_i*dt + tiny))
+
+applied = a_i * G_i
+
+dI_i += applied
+dE_i -= cI * applied
 ```
+<br>
 
-Information decay + maintenance:
-
+**Information decay (refund; accumulate dE, dI)**
 ```text
-fluxSupport = sigma_i * clamp01(flux_i / (info_threshold + ε))
-dI -= info_decay * I * (1 - 0.6 * fluxSupport)
-dE -= info_cost * I * (1 - 0.6 * fluxSupport)
+dI_i -= lambdaI * I_i
+dE_i += cI * lambdaI * I_i
 ```
+<br>
 
-Sigma hysteresis:
-
+**Integrate E and I**
 ```text
-if I >= sigma_on:  sigma += relaxRate * (I - sigma_on) * dt
-if I <= sigma_off: sigma += relaxRate * (I - sigma_off) * dt
-sigma = clamp01(sigma)
+E_i <- E_i + dE_i * dt
+I_i <- max(0, I_i + dI_i * dt)
 ```
+<br>
 
-Collapse (novelty):
-
+**Information -> Structure (sigma), hysteresis + cost**
 ```text
-release = collapse_fraction * I * info_energy_cost
-E[j] += release * weight_j / Σ weight
-E[i] -= release
-I[i] *= 0.25
-if I[i] < sigma_off: sigma[i] *= 0.5
+if I_i >= theta_on:   ds = etaS * (I_i - theta_on)
+
+else if I_i <= theta_off: ds = etaS * (I_i - theta_off)
+
+else:                 ds = 0
+
+sigma*_i = clip(sigma_i + ds * dt, 0, 1)
+
+write = max(0, sigma*_i - sigma_i)
+
+payW = min(max(E_i,0), cSigma * write)
+
+sigma_i <- sigma_i + write * (payW / (cSigma*write + tiny))
+
+E_i <- E_i - payW
 ```
+<br>
 
-Collapse jitter:
-
+**Structure maintenance + relaxation**
 ```text
-weight_j *= exp(jitter * (rng() - 0.5))
+payM = min(max(E_i,0), cMaint * sigma_i)
+E_i <- E_i - payM
+
+relax = lambdaS * sigma_i
+sigma*_i = clip(sigma_i - relax, 0, 1)
+
+E_i <- E_i + (sigma_i - sigma*_i) * cSigma * 0.6
+sigma_i <- sigma*_i
 ```
+<br>
 
-Collapse weights (base term):
-
+**Collapse (punctuated recycling)**
 ```text
-base_j = 0.6 + 0.8 * sigma_j
-jitter_j = exp(jitter * (rng() - 0.5))
-weight_j = max(0.001, base_j * jitter_j)
+if I_i >= I_col:
+  R_i = min(max(E_i,0), fC * I_i * cI)
+
+  I_i <- max(0, I_i - R_i / cI)
+  if I_i < theta_off: sigma_i <- 0.5 * sigma_i
+
+  E_i <- E_i - R_i
+
+  redistribute R_i to neighbors with weights w_ij (sum_j w_ij = 1)
+
+  optional nonlocal jump (conservative transport, drawn from R_i):
+    if rand() < p_jump:
+      E_k <- E_k + 0.5 * R_i
+      E_i <- E_i - 0.5 * R_i
 ```
 
-Noise (flux-gated):
 
-```text
-gate = clamp01((flux - info_threshold) / (info_threshold + ε))
-dE += noise_floor * (rng() - 0.5) * gate^4
-```
+<br/>
 
-Implementation notes:
+## What the simulation shows
 
-- Collapse triggers only when I >= collapse_I.
-- Flux is accumulated once per undirected edge (j <= i is skipped), then averaged per node.
-- Integration is explicit Euler with per-step accumulators (dE, dI).
+With the same rules and only parameter changes, the system qualitatively exhibits:
 
-Knobs (controls):
+- smooth diffusion
+- canalized energy paths
+- punctuated growth–collapse cycles
+- large‑scale patterns
 
-- Energy flow: diffusion, sigma_slow (mobility floor), evaporation
-- Information: info_gain, info_threshold, info_decay, info_cost, info_energy_cost
-- Sigma hysteresis: sigma_on, sigma_off
-- Collapse: collapse_I, collapse_fraction, jitter
-- Sun drive: sun_strength, sun_width, sun_speed, sun_lat_bias, sun_lon_wobble
-- Noise: noise_floor
+No regime is hard‑coded. They emerge from the same equations.
+
+
+
+<br/>
+
+## Interpretation
+
+- **Energy (E)** is a free‑energy–like potential
+- **Flux** is energy in motion
+- **Information (I)** is stored surprise in energy flow
+- **Structure (σ)** is frozen information that reshapes flow
+
+Structure exists only because energy continuously pays for it. Collapse is not failure — it is essential for renewal.
+
+
+
+<br/>
+
+## Controls
+
+- View modes: energy / information / structure / composite
+- Parameters control diffusion, thresholds, costs, and collapse
+- A single phase‑like control can sweep through regimes
+- The bottom chart in `index.html` plots ΣI(t) and Σσ(t), showing total information and total structure over time.
+
+<br/>
+
+
+## Todo
+
+- [ ] Add short parameter descriptions
+- [ ] Explain the main controls
+- [ ] Add a few basic metrics
+
+<br/>
+
+## Summary
+
+> **This simulation explores the minimal local conditions under which energy flow can give rise to information, structure, collapse, and diverse emergent regimes — without agents or symbols.**
+
+<br/>
+
+## License
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+See `LICENSE` or https://creativecommons.org/licenses/by-nc-sa/4.0/.
