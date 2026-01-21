@@ -118,6 +118,7 @@
         <button class="btn" id="testIBtn" type="button">Test I</button>
         <button class="btn" id="testJBtn" type="button">Test J</button>
         <button class="btn" id="testKBtn" type="button">Test K</button>
+        <button class="btn" id="testLBtn" type="button">Test L</button>
       </div>
       <div id="sliders"></div>
     </details>
@@ -126,6 +127,8 @@
     <a href="https://astradeep.com">astradeep.com</a>
     <span>·</span>
     <a href="https://github.com/ThourayaBchir/energy-information-emergence">GitHub</a>
+    <span>·</span>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">License</a>
   </footer>
 </div>
 
@@ -180,6 +183,7 @@ const testHPreset = TEST_PRESETS.H;
 const testIPreset = TEST_PRESETS.I;
 const testJPreset = TEST_PRESETS.J;
 const testKPreset = TEST_PRESETS.K;
+const testLPreset = TEST_PRESETS.L;
 
 // ===== Phase mapping =====
 let phase = 0.70;
@@ -539,6 +543,7 @@ document.getElementById('testHBtn').addEventListener('click', () => applyAdvance
 document.getElementById('testIBtn').addEventListener('click', () => applyAdvancedPreset(testIPreset));
 document.getElementById('testJBtn').addEventListener('click', () => applyAdvancedPreset(testJPreset));
 document.getElementById('testKBtn').addEventListener('click', () => applyAdvancedPreset(testKPreset));
+document.getElementById('testLBtn').addEventListener('click', () => applyAdvancedPreset(testLPreset));
 
 // ===== Tests =====
 (function runTests(){

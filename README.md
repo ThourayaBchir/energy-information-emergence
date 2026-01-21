@@ -1,5 +1,7 @@
 # Energy–Information–Structure Simulator
 
+![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
+
 The goal is to find a minimum set of local rules that can generate many dynamical regimes, where structure and large‑scale patterns emerge beyond the local rules themselves — potentially yielding anything interesting.
 
 The novel mechanism is to create dynamics through an energy–information–structure loop:
@@ -80,7 +82,7 @@ Each cell stores three continuous quantities:
    Energy flows down gradients. The amount of flow depends on local structure (σ).
 
 3. **Flux → Information**  
-   When local energy flux exceeds a baseline, information condenses. Writing information costs energy and is limited by available E (predicted E after the current step).
+   When local energy flux exceeds a baseline, information is created, this creation costs energy and is limited by available E (predicted E after the current step).
 
 4. **Information decay**  
    Information decays unless reinforced, refunding its energetic cost.
@@ -258,3 +260,8 @@ Structure exists only because energy continuously pays for it. Collapse is not f
 > **This simulation explores the minimal local conditions under which energy flow can give rise to information, structure, collapse, and diverse emergent regimes — without agents or symbols.**
 
 <br/>
+
+## License
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+See `LICENSE` or https://creativecommons.org/licenses/by-nc-sa/4.0/.
