@@ -2,9 +2,9 @@
 
 ![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
 
-The goal is to find a minimum set of local rules that can generate many dynamical regimes, where structure and large‑scale patterns emerge beyond the local rules themselves — potentially yielding anything interesting.
+This project explores a **minimal local mechanism** that can produce multiple dynamical regimes where large‑scale structure emerges without agents, goals, or optimization.
 
-The novel mechanism is to create dynamics through an energy–information–structure loop:
+**Core novelty:** a local energy–information–structure loop where information and structure are *energetically paid* states of flow.
 - **Energy (E)** is a local potential that is injected, transported, and dissipated.
 - **Information (I)** is stored anomalous energy flux: it appears only when transported flow exceeds what smooth diffusion can absorb, and it costs energy to exist.
 - **Structure (σ)** is a paid constraint on flow: it modifies conductance, costs energy to write and maintain, and relaxes if unsupported.
@@ -18,7 +18,7 @@ These three quantities continuously transform into one another through purely lo
 
 <br/>
 
-This is a **substrate‑level dynamical model** built from local diffusion, flux‑thresholded information, hysteretic structure, and collapse on a driven grid/mesh. The current demo (`index.html`) runs on a 2D torus grid with degree‑normalized flux.
+This is a **substrate‑level dynamical model** built from local diffusion, flux‑thresholded information, hysteretic structure, and collapse on a driven grid. The current demo (`index.html`) runs on a 2D torus grid with degree‑normalized flux.
 
 
 <br/>
@@ -49,9 +49,9 @@ Structure is not injected. Information is not symbolic. Everything emerges from 
             +----> back to flux
 ```
 
-The key idea is:
+The key idea:
 
-> **Information and structure are not separate from energy — they are different, costly organizations of energetic flow.**
+> **Information and structure are costly organizations of energetic flow — not separate from energy.**
 
 
 <br/>
@@ -211,14 +211,7 @@ if I_i >= I_col:
 
 ## What the simulation shows
 
-With the same rules and only parameter changes, the system qualitatively exhibits:
-
-- smooth diffusion
-- canalized energy paths
-- punctuated growth–collapse cycles
-- large‑scale patterns
-
-No regime is hard‑coded. They emerge from the same equations.
+The dynamics show qualitative emergence. In many regimes, energy flow builds structure, structure redirects flow, and feedback keeps the system dynamic. The outcome depends on parameters to tune, ranging from smooth diffusion to patterned or punctuated activity.
 
 
 
@@ -239,6 +232,16 @@ Structure exists only because energy continuously pays for it. Collapse is not f
 
 ## Controls
 
+## Quickstart
+
+- Open `index.html` in a browser.
+- Use keys **1–4** to switch views (E / I / σ / composite).
+- **Space** pauses, **R** resets, **P** toggles phase‑lock.
+- The Phase slider sweeps a coordinated parameter map across regimes.
+- Advanced sliders expose all parameters.
+
+## Controls
+
 - View modes: energy / information / structure / composite
 - Parameters control diffusion, thresholds, costs, and collapse
 - A single phase‑like control can sweep through regimes
@@ -255,9 +258,10 @@ Structure exists only because energy continuously pays for it. Collapse is not f
 
 <br/>
 
+
 ## Summary
 
-> **This simulation explores the minimal local conditions under which energy flow can give rise to information, structure, collapse, and diverse emergent regimes — without agents or symbols.**
+> **This simulation explores the minimal local conditions under which energy flow can give rise to information, structure, collapse, and diverse emergent regimes.**
 
 <br/>
 
