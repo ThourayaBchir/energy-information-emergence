@@ -1,5 +1,7 @@
 # Energy–Information–Structure Simulator
 
+https://information-dynamics.netlify.app/
+
 ![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)
 
 This project explores a **minimal local mechanism** that can produce multiple dynamical regimes where large‑scale structure emerges without agents, goals, or optimization.
